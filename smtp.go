@@ -33,6 +33,8 @@ type Dialer struct {
 	// LocalName is the hostname sent to the SMTP server with the HELO command.
 	// By default, "localhost" is sent.
 	LocalName string
+	// Network is dialer network (eg. tcp, tcp4)
+	Network string
 }
 
 // NewDialer returns a new SMTP Dialer. The given parameters are used to connect
@@ -44,6 +46,7 @@ func NewDialer(host string, port int, username, password string) *Dialer {
 		Username: username,
 		Password: password,
 		SSL:      port == 465,
+		Network:  "tcp",
 	}
 }
 
@@ -58,7 +61,7 @@ func NewPlainDialer(host string, port int, username, password string) *Dialer {
 // Dial dials and authenticates to an SMTP server. The returned SendCloser
 // should be closed when done using it.
 func (d *Dialer) Dial() (SendCloser, error) {
-	conn, err := netDialTimeout("tcp", addr(d.Host, d.Port), 10*time.Second)
+	conn, err := netDialTimeout(d.Network, addr(d.Host, d.Port), 10*time.Second)
 	if err != nil {
 		return nil, err
 	}
